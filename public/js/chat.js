@@ -1,15 +1,17 @@
 const socket = io()
 
-//aici primim eventul
-socket.on('countUpdated', (count) => {
-    console.log("The count has been updated!", count)
+const messageFrom = document.querySelector('#message-form')
+
+socket.on('message', (message) => {
+    console.log(message)
 })
 
-//detectam evenimentul click
-document.querySelector('#increment').addEventListener('click', () => {
-    console.log('Clicked')
+messageFrom.addEventListener('submit', (e) => {
+    e.preventDefault()
 
-    // emitem un event atunci cand se apasa butonul
-    socket.emit('increment')
+    const message = e.target.elements.message.value
+    socket.emit('sendMessage', message)
 })
+
+
 

@@ -5,7 +5,11 @@
     </head>
     <body>
         <h1>Chat app</h1>
-        <button id="increment">+1</button>
+<!--        <button id="increment">+1</button>-->
+        <form id="message-form">
+            <input name="message" id="message-input" placeholder="Message">
+            <button id="message-button">Search</button>
+        </form>
         <!-- When we load this in our client, Javascript code will have access to all of the stuff from
          the library it needs in order to set up the communication -->
         <script src="/socket.io/socket.io.js"></script>
