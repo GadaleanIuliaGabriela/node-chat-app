@@ -23,9 +23,11 @@ io.on('connection', (socket) => {
     // eventul se trimite la toti inafara de ala care s-a conectat
     socket.broadcast.emit('message', 'A new user has joined!')
 
-    socket.on('sendMessage', (message) => {
+    socket.on('sendMessage', (message, callback) => {
         // se trimite la toti
         io.emit('message', message)
+
+        callback('Delivered!')
     })
 
     socket.on('sendLocation', (location) => {
