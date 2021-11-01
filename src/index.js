@@ -41,6 +41,11 @@ io.on('connection', (socket) => {
         // eventul se trimite la toti inafara de ala care s-a conectat
         socket.broadcast.to(room).emit('message', generateMessage(`${user.username} has joined`))
 
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+
         callback()
     })
 
@@ -70,6 +75,10 @@ io.on('connection', (socket) => {
 
         if(user) {
             io.to(user.room).emit('message', generateMessage(`${user.username} has left!`))
+            io.to(user.room).emit('roomData', {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            })
         }
 
     })
