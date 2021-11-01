@@ -27,6 +27,15 @@ io.on('connection', (socket) => {
         // se trimite la toti
         io.emit('message', message)
     })
+
+    socket.on('sendLocation', (location) => {
+        io.emit('message', 'https://google.com/maps?q=' + location.latitude+","+location.longitude)
+    })
+
+    // are loc atunci cand un client se deconecteaza
+    socket.on('disconnect', () => {
+        io.emit('message', 'A user has left!')
+    })
 })
 
 
