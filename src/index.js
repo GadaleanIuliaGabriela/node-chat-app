@@ -16,9 +16,15 @@ app.use(express.static(publicDirectory))
 // event care se numeste connection si care are loc atunci cand un client se conecteaza la server
 io.on('connection', (socket) => {
     console.log('New wev socket connection')
+
+    // se trimite la ala care s-a coectat
     socket.emit('message', 'Welcome')
 
+    // eventul se trimite la toti inafara de ala care s-a conectat
+    socket.broadcast.emit('message', 'A new user has joined!')
+
     socket.on('sendMessage', (message) => {
+        // se trimite la toti
         io.emit('message', message)
     })
 })
