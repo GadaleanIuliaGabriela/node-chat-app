@@ -4,6 +4,7 @@ const express = require('express')
 const socketio = require('socket.io')
 const Filter = require('bad-words')
 const { generateMessage, generateLocationMessage } = require('./utils/messages')
+const { addUser, removeUser, getUser, getUsersInRoom } = require('./utils/users')
 
 const app = express()
 const server = http.createServer(app)
@@ -19,21 +20,32 @@ app.use(express.static(publicDirectory))
 io.on('connection', (socket) => {
     console.log('New wev socket connection')
 
-    // se trimite la ala care s-a coectat
-    socket.emit('message', generateMessage('Welcome!'))
-    // eventul se trimite la toti inafara de ala care s-a conectat
-    socket.broadcast.emit('message', generateMessage('A new user has joined!'))
+    socket.on('join', ({username, room}, callback) => {
+        const {error, user} = addUser({
+            id:socket.id,
+            username,
+            room
+        })
 
-    socket.on('join', ({username, room}) => {
+        if(error) {
+            return callback(error)
+        }
+
         // join -> iti pune la dispozitie 2 noi moduri de a face emit la eventuri
         // 1. io.to.emit -> ne permite sa trimitem un mesaj catre toate socketurile care sunt intr-un room fara sa le trimita la alea care nu sunt in room-ul respectiv
         // 2. socket.broadcast.to.emit -> la toti cu exceptia clientului actual dar limiteaza la un room specific
-        socket.join(room)
+        socket.join(user.room)
 
+        // se trimite la ala care s-a coectat
+        socket.emit('message', generateMessage('Welcome!'))
+        // eventul se trimite la toti inafara de ala care s-a conectat
+        socket.broadcast.to(room).emit('message', generateMessage(`${user.username} has joined`))
 
+        callback()
     })
 
     socket.on('sendMessage', (message, callback) => {
+        const user = getUser(socket.id)
         const filter = new Filter()
 
         if(filter.isProfane(message)){
@@ -41,18 +53,25 @@ io.on('connection', (socket) => {
         }
 
         // se trimite la toti
-        io.emit('message', generateMessage(message))
+        io.to(user.room).emit('message', generateMessage(user.username, message))
         callback()
     })
 
     socket.on('sendLocation', (location, callback) => {
-        io.emit('locationMessage', generateLocationMessage('https://google.com/maps?q=' + location.latitude+","+location.longitude))
+        const user = getUser(socket.id)
+        console.log(user)
+        io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, 'https://google.com/maps?q=' + location.latitude+","+location.longitude))
         callback()
     })
 
     // are loc atunci cand un client se deconecteaza
     socket.on('disconnect', () => {
-        io.emit('message', generateMessage('A user has left!'))
+        const user = removeUser(socket.id)
+
+        if(user) {
+            io.to(user.room).emit('message', generateMessage(`${user.username} has left!`))
+        }
+
     })
 })
 
