@@ -18,7 +18,7 @@ app.use(express.static(publicDirectory))
 
 // event care se numeste connection si care are loc atunci cand un client se conecteaza la server
 io.on('connection', (socket) => {
-    console.log('New wev socket connection')
+    console.log('New wev socket connection!!!')
 
     socket.on('join', ({username, room}, callback) => {
         const {error, user} = addUser({
